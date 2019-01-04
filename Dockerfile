@@ -23,12 +23,17 @@ COPY --from=builder /go/src/github.com/prometheus/prometheus/documentation/examp
 COPY --from=builder /go/src/github.com/prometheus/prometheus/console_libraries/ /etc/prometheus/
 COPY --from=builder /go/src/github.com/prometheus/prometheus/consoles/ /etc/prometheus/
 
+COPY entrypoint.sh /
+RUN chmod +x /entrypoint.sh
+
 EXPOSE 9090
-VOLUME [ "/prometheus" ]
+
 WORKDIR /prometheus
-ENTRYPOINT [ "/bin/prometheus" ]
-CMD [ "-config.file=/etc/prometheus/prometheus.yml", \
-      "-storage.local.path=/prometheus", \
-      "-web.console.libraries=/etc/prometheus/console_libraries", \
-      "-web.console.templates=/etc/prometheus/consoles", \
+
+ENTRYPOINT ["/entrypoint.sh"]
+CMD [ "/bin/prometheus", \
+      "--config.file=/etc/prometheus/prometheus.yml", \
+      "--storage.tsdb.path=/prometheus", \
+      "--web.console.libraries=/etc/prometheus/console_libraries", \
+      "--web.console.templates=/etc/prometheus/consoles", \
       "--web.enable-lifecycle" ]
